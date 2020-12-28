@@ -34,7 +34,7 @@ public class Main {
 
         PhoneBook phoneBook = new PhoneBook(INITIALCAPACITY);
         for (int i = 0; i < INITIALCAPACITY; i++) {
-            phoneBook.add(surnames[(int) (Math.random() * words.length)],
+            phoneBook.add(surnames[(int) (Math.random() * surnames.length)],
                     "+7913" + (int) (Math.random() * 9000000 + 1000000));
         }
 
