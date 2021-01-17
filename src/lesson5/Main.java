@@ -22,12 +22,16 @@ public class Main {
         float[] array = new float[SIZE];
         float[] firstHalf = new float[HALF];
         float[] secondHalf = new float[SIZE - HALF];
+        long startTime = System.currentTimeMillis();
         System.arraycopy(array, 0, firstHalf, 0, HALF);
         System.arraycopy(array, HALF, secondHalf, 0, SIZE - HALF);
+        System.out.println("Время разбивки: " + (System.currentTimeMillis() - startTime));
         new Thread(() -> this.fillArray(firstHalf, "2 first half")).start();
         new Thread(() -> this.fillArray(secondHalf, "2 second half")).start();
+        startTime = System.currentTimeMillis();
         System.arraycopy(firstHalf, 0, array, 0, firstHalf.length);
         System.arraycopy(secondHalf, 0, array, firstHalf.length, secondHalf.length);
+        System.out.println("Время склейки: " + (System.currentTimeMillis() - startTime));
     }
 
     public void fillArray(float[] array, String name) {
