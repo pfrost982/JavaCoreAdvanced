@@ -1,48 +1,63 @@
 package lesson5;
 
+import java.util.Arrays;
+
 public class Main {
 
-    static final int SIZE = 10_000_000;
-    static final int HALF = SIZE / 2;
-
     public static void main(String[] args) {
-        Main main = new Main();
+        method1(10_000_000);
+        method2(10_000_000);
 
-        main.method1();
-        main.method2();
+        float[] array1 = method1(10);
+        float[] array2 = method2(10);
+        System.out.println();
+        System.out.println(Arrays.toString(array1));
+        System.out.println(Arrays.toString(array2));
 
     }
 
-    public void method1() {
-        float[] array = new float[SIZE];
-        new Thread(() -> this.fillArray(array, "1")).start();
-    }
+    public static float[] method1(int size) {
+        float[] array = new float[size];
+        var aggregate = new ArrayAggregate(array, 0);
 
-    public void method2() {
-        float[] array = new float[SIZE];
-        float[] firstHalf = new float[HALF];
-        float[] secondHalf = new float[SIZE - HALF];
+        System.out.println("\nМетод 1 начал работу");
         long startTime = System.currentTimeMillis();
-        System.arraycopy(array, 0, firstHalf, 0, HALF);
-        System.arraycopy(array, HALF, secondHalf, 0, SIZE - HALF);
-        System.out.println("Время разбивки: " + (System.currentTimeMillis() - startTime));
-        new Thread(() -> this.fillArray(firstHalf, "2 first half")).start();
-        new Thread(() -> this.fillArray(secondHalf, "2 second half")).start();
-        startTime = System.currentTimeMillis();
-        System.arraycopy(firstHalf, 0, array, 0, firstHalf.length);
-        System.arraycopy(secondHalf, 0, array, firstHalf.length, secondHalf.length);
-        System.out.println("Время склейки: " + (System.currentTimeMillis() - startTime));
+        aggregate.fillArray();
+        long endTime = System.currentTimeMillis();
+        System.out.println("Метод 1 закончил работу. Время: " + (endTime - startTime));
+        return array;
     }
 
-    public void fillArray(float[] array, String name) {
+
+    public static float[] method2(int size) {
+        int half = size / 2;
+        float[] array = new float[size];
+        float[] firstHalfArray = new float[half];
+        float[] secondHalfArray = new float[size - half];
+
+        System.out.println("\nМетод 2 начал работу");
         long startTime = System.currentTimeMillis();
-        System.out.println("Start Method " + name);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = 1;
+
+        System.arraycopy(array, 0, firstHalfArray, 0, half);
+        System.arraycopy(array, half, secondHalfArray, 0, size - half);
+
+        Thread firstThread = new Thread(new ArrayAggregate(firstHalfArray, 0), "firstThread");
+        Thread secondThread = new Thread(new ArrayAggregate(secondHalfArray, half), "secondThread");
+
+        firstThread.start();
+        secondThread.start();
+        try {
+            firstThread.join();
+            secondThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        for (int i = 0; i < array.length; i++) {
-            array[i] = (float) (array[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
-        }
-        System.out.println("Finish Method " + name + ", Time: " + (System.currentTimeMillis() - startTime) + " length " + array.length);
+
+        System.arraycopy(firstHalfArray, 0, array, 0, firstHalfArray.length);
+        System.arraycopy(secondHalfArray, 0, array, firstHalfArray.length, secondHalfArray.length);
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Метод 2 закончил работу. Время: " + (endTime - startTime));
+        return array;
     }
 }
